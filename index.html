@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#1a2a3a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="description"
+        content="Aerauliqa - Indoor Air Quality Monitoring App. Monitor Temperature, Humidity, VOC and CO₂ levels in real-time.">
+
+    <title>Aerauliqa - Air Quality Monitor</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+    <div id="app">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-content">
+                <div class="logo-container">
+                    <img src="images/AerauliqaApp_white logo-01.svg" alt="Aerauliqa" class="logo">
+                </div>
+                <div class="connection-status" id="connectionStatus">
+                    <span class="status-dot connected"></span>
+                    <span class="status-text">Connected</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Air Quality Display -->
+        <main class="main-content">
+            <!-- Central AQI Display -->
+            <section class="aqi-hero" id="aqiHero">
+                <div class="aqi-ring" id="aqiRing">
+                    <div class="aqi-inner">
+                        <div class="aqi-value-container">
+                            <span class="aqi-label">Air Quality Index</span>
+                            <span class="aqi-value" id="aqiValue">2</span>
+                            <span class="aqi-status" id="aqiStatus">Good</span>
+                        </div>
+                    </div>
+                    <svg class="aqi-progress" viewBox="0 0 200 200">
+                        <circle class="aqi-progress-bg" cx="100" cy="100" r="90" />
+                        <circle class="aqi-progress-bar" id="aqiProgressBar" cx="100" cy="100" r="90" />
+                    </svg>
+                </div>
+                <div class="led-indicator" id="ledIndicator">
+                    <div class="led-glow"></div>
+                </div>
+            </section>
+
+            <!-- Air Quality Color Legend -->
+            <section class="aqi-legend">
+                <h3 class="legend-title">Air Quality Levels</h3>
+                <div class="legend-items">
+                    <div class="legend-item">
+                        <span class="legend-dot excellent"></span>
+                        <span class="legend-label">Excellent</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-dot good"></span>
+                        <span class="legend-label">Normal</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-dot poor"></span>
+                        <span class="legend-label">Poor</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-dot very-poor"></span>
+                        <span class="legend-label">Very Poor</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Sensor Cards Grid -->
+            <section class="sensors-grid">
+                <!-- Temperature Card -->
+                <div class="sensor-card" data-sensor="temperature">
+                    <div class="sensor-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z" />
+                        </svg>
+                    </div>
+                    <div class="sensor-info">
+                        <span class="sensor-label">Temperature</span>
+                        <div class="sensor-value-row">
+                            <span class="sensor-value" id="tempValue">24.5</span>
+                            <span class="sensor-unit">°C</span>
+                        </div>
+                        <div class="sensor-range">
+                            <span class="range-label">Comfort: 20-26°C</span>
+                            <div class="range-bar">
+                                <div class="range-fill" id="tempRange" style="width: 70%"></div>
+                                <div class="range-marker" id="tempMarker" style="left: 70%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Humidity Card -->
+                <div class="sensor-card" data-sensor="humidity">
+                    <div class="sensor-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" />
+                        </svg>
+                    </div>
+                    <div class="sensor-info">
+                        <span class="sensor-label">Humidity</span>
+                        <div class="sensor-value-row">
+                            <span class="sensor-value" id="humidityValue">45</span>
+                            <span class="sensor-unit">%</span>
+                        </div>
+                        <div class="sensor-range">
+                            <span class="range-label">Ideal: 40-60%</span>
+                            <div class="range-bar">
+                                <div class="range-fill" id="humidityRange" style="width: 50%"></div>
+                                <div class="range-marker" id="humidityMarker" style="left: 50%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CO2 Card -->
+                <div class="sensor-card" data-sensor="co2">
+                    <div class="sensor-icon co2-icon">
+                        <span>CO₂</span>
+                    </div>
+                    <div class="sensor-info">
+                        <span class="sensor-label">Carbon Dioxide</span>
+                        <div class="sensor-value-row">
+                            <span class="sensor-value" id="co2Value">650</span>
+                            <span class="sensor-unit">ppm</span>
+                        </div>
+                        <div class="sensor-range">
+                            <span class="range-label">Good: &lt;1000ppm</span>
+                            <div class="range-bar">
+                                <div class="range-fill co2-fill" id="co2Range" style="width: 35%"></div>
+                                <div class="range-marker" id="co2Marker" style="left: 35%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VOC Card -->
+                <div class="sensor-card" data-sensor="voc">
+                    <div class="sensor-icon voc-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" />
+                            <path d="M12 6v6l4 2" />
+                        </svg>
+                    </div>
+                    <div class="sensor-info">
+                        <span class="sensor-label">VOC Index</span>
+                        <div class="sensor-value-row">
+                            <span class="sensor-value" id="vocValue">28</span>
+                            <span class="sensor-unit">ppb</span>
+                        </div>
+                        <div class="sensor-range">
+                            <span class="range-label">Low: &lt;50ppb</span>
+                            <div class="range-bar">
+                                <div class="range-fill voc-fill" id="vocRange" style="width: 28%"></div>
+                                <div class="range-marker" id="vocMarker" style="left: 28%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Air Quality Tips -->
+            <section class="tips-section" id="tipsSection">
+                <div class="tip-card">
+                    <div class="tip-icon">💨</div>
+                    <div class="tip-content">
+                        <span class="tip-title" id="tipTitle">Air quality is good</span>
+                        <span class="tip-text" id="tipText">Perfect conditions for indoor activities. Keep up the good
+                            ventilation!</span>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <a href="#" class="nav-item active" data-page="home">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                    <polyline points="9,22 9,12 15,12 15,22" />
+                </svg>
+                <span>Home</span>
+            </a>
+            <a href="#" class="nav-item" data-page="history">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 8v4l3 3" />
+                    <circle cx="12" cy="12" r="10" />
+                </svg>
+                <span>History</span>
+            </a>
+            <a href="#" class="nav-item" data-page="info">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10" />
+                    <path d="M12 16v-4" />
+                    <path d="M12 8h.01" />
+                </svg>
+                <span>Info</span>
+            </a>
+            <a href="#" class="nav-item" data-page="settings">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="3" />
+                    <path
+                        d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                </svg>
+                <span>Settings</span>
+            </a>
+        </nav>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+
+</html>

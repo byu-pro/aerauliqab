@@ -1,0 +1,830 @@
+/* ===================================
+   AERAULIQA IAQ MONITORING APP
+   Premium Modern Design System
+   =================================== */
+
+/* CSS Variables - Design Tokens */
+:root {
+    /* Primary Colors - Fresh & Clean */
+    --primary-dark: #1a2a3a;
+    --primary-medium: #2d4a5e;
+    --primary-light: #4a7c94;
+
+    /* Background Gradients */
+    --bg-gradient-start: #e8f4f8;
+    --bg-gradient-end: #f5fafc;
+    --card-bg: rgba(255, 255, 255, 0.95);
+    --card-bg-glass: rgba(255, 255, 255, 0.85);
+
+    /* Air Quality Status Colors (LED-inspired) */
+    --aqi-excellent: #3b82f6;
+    /* Blue - Excellent */
+    --aqi-excellent-light: #93c5fd;
+    --aqi-excellent-glow: rgba(59, 130, 246, 0.4);
+
+    --aqi-good: #22c55e;
+    /* Green - Good/Normal */
+    --aqi-good-light: #86efac;
+    --aqi-good-glow: rgba(34, 197, 94, 0.4);
+
+    --aqi-poor: #eab308;
+    /* Yellow - Poor */
+    --aqi-poor-light: #fde047;
+    --aqi-poor-glow: rgba(234, 179, 8, 0.4);
+
+    --aqi-bad: #ef4444;
+    /* Red - Very Poor */
+    --aqi-bad-light: #fca5a5;
+    --aqi-bad-glow: rgba(239, 68, 68, 0.4);
+
+    /* Text Colors */
+    --text-primary: #1e293b;
+    --text-secondary: #64748b;
+    --text-muted: #94a3b8;
+    --text-light: #ffffff;
+
+    /* Sensor Colors */
+    --temp-color: #f97316;
+    --humidity-color: #06b6d4;
+    --co2-color: #8b5cf6;
+    --voc-color: #ec4899;
+
+    /* Shadows & Effects */
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.12);
+    --shadow-glow: 0 0 30px;
+
+    /* Spacing */
+    --space-xs: 4px;
+    --space-sm: 8px;
+    --space-md: 16px;
+    --space-lg: 24px;
+    --space-xl: 32px;
+    --space-2xl: 48px;
+
+    /* Border Radius */
+    --radius-sm: 8px;
+    --radius-md: 16px;
+    --radius-lg: 24px;
+    --radius-xl: 32px;
+    --radius-full: 50%;
+
+    /* Transitions */
+    --transition-fast: 150ms ease;
+    --transition-base: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-smooth: 500ms cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* Current AQI Color (set dynamically via JS) */
+    --current-aqi-color: var(--aqi-good);
+    --current-aqi-glow: var(--aqi-good-glow);
+}
+
+/* Reset & Base */
+*,
+*::before,
+*::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: linear-gradient(180deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+    color: var(--text-primary);
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow-x: hidden;
+}
+
+#app {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    min-height: 100dvh;
+    max-width: 480px;
+    margin: 0 auto;
+    position: relative;
+    background: linear-gradient(180deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+}
+
+/* ===================================
+   HEADER
+   =================================== */
+.app-header {
+    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-medium) 100%);
+    padding: var(--space-md) var(--space-lg);
+    padding-top: calc(var(--space-lg) + env(safe-area-inset-top, 20px));
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: var(--shadow-md);
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo-container {
+    flex: 1;
+    display: flex;
+    align-items: center;
+}
+
+.logo {
+    height: 48px;
+    width: auto;
+    filter: brightness(1.1);
+    max-width: 180px;
+}
+
+.connection-status {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    background: rgba(255, 255, 255, 0.1);
+    padding: var(--space-xs) var(--space-md);
+    border-radius: var(--radius-lg);
+    backdrop-filter: blur(10px);
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: var(--radius-full);
+    background: var(--aqi-good);
+    animation: pulse 2s infinite;
+}
+
+.status-dot.disconnected {
+    background: var(--aqi-bad);
+    animation: none;
+}
+
+.status-text {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--text-light);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.6;
+        transform: scale(1.1);
+    }
+}
+
+/* ===================================
+   MAIN CONTENT
+   =================================== */
+.main-content {
+    flex: 1;
+    padding: var(--space-lg);
+    padding-bottom: calc(80px + var(--space-lg) + env(safe-area-inset-bottom, 0px));
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+}
+
+/* ===================================
+   AQI HERO SECTION
+   =================================== */
+.aqi-hero {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: var(--space-lg) 0;
+    position: relative;
+}
+
+.aqi-ring {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.aqi-inner {
+    position: absolute;
+    width: 160px;
+    height: 160px;
+    background: var(--card-bg);
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow-lg);
+    z-index: 2;
+}
+
+.aqi-value-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-xs);
+}
+
+.aqi-label {
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+}
+
+.aqi-value {
+    font-size: 3.5rem;
+    font-weight: 800;
+    color: var(--current-aqi-color);
+    line-height: 1;
+    transition: color var(--transition-smooth);
+}
+
+.aqi-status {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--current-aqi-color);
+    transition: color var(--transition-smooth);
+}
+
+.aqi-progress {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+}
+
+.aqi-progress-bg {
+    fill: none;
+    stroke: rgba(0, 0, 0, 0.05);
+    stroke-width: 12;
+}
+
+.aqi-progress-bar {
+    fill: none;
+    stroke: var(--current-aqi-color);
+    stroke-width: 12;
+    stroke-linecap: round;
+    stroke-dasharray: 565.48;
+    stroke-dashoffset: 141.37;
+    transition: stroke-dashoffset var(--transition-smooth), stroke var(--transition-smooth);
+    filter: drop-shadow(0 0 8px var(--current-aqi-glow));
+}
+
+/* LED Indicator */
+.led-indicator {
+    margin-top: var(--space-md);
+    position: relative;
+    width: 16px;
+    height: 16px;
+}
+
+.led-glow {
+    position: absolute;
+    inset: 0;
+    background: var(--current-aqi-color);
+    border-radius: var(--radius-full);
+    animation: led-pulse 2s infinite;
+    box-shadow:
+        0 0 10px var(--current-aqi-color),
+        0 0 20px var(--current-aqi-glow),
+        0 0 40px var(--current-aqi-glow);
+    transition: background var(--transition-smooth), box-shadow var(--transition-smooth);
+}
+
+@keyframes led-pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.7;
+        transform: scale(1.15);
+    }
+}
+
+/* ===================================
+   AQI COLOR LEGEND
+   =================================== */
+.aqi-legend {
+    background: var(--card-bg-glass);
+    backdrop-filter: blur(20px);
+    border-radius: var(--radius-lg);
+    padding: var(--space-md);
+    box-shadow: var(--shadow-md);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+}
+
+.legend-title {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    text-align: center;
+    margin-bottom: var(--space-md);
+}
+
+.legend-items {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.legend-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-xs);
+}
+
+.legend-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: var(--radius-full);
+    position: relative;
+}
+
+.legend-dot::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: var(--radius-full);
+    animation: legend-dot-pulse 2s infinite;
+}
+
+.legend-dot.excellent {
+    background: var(--aqi-excellent);
+    box-shadow: 0 0 8px var(--aqi-excellent-glow);
+}
+
+.legend-dot.excellent::after {
+    background: var(--aqi-excellent);
+}
+
+.legend-dot.good {
+    background: var(--aqi-good);
+    box-shadow: 0 0 8px var(--aqi-good-glow);
+}
+
+.legend-dot.good::after {
+    background: var(--aqi-good);
+}
+
+.legend-dot.poor {
+    background: var(--aqi-poor);
+    box-shadow: 0 0 8px var(--aqi-poor-glow);
+}
+
+.legend-dot.poor::after {
+    background: var(--aqi-poor);
+}
+
+.legend-dot.very-poor {
+    background: var(--aqi-bad);
+    box-shadow: 0 0 8px var(--aqi-bad-glow);
+}
+
+.legend-dot.very-poor::after {
+    background: var(--aqi-bad);
+}
+
+.legend-label {
+    font-size: 0.65rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+@keyframes legend-dot-pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.5;
+        transform: scale(1.2);
+    }
+}
+
+/* ===================================
+   SENSOR CARDS GRID
+   =================================== */
+.sensors-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-md);
+}
+
+.sensor-card {
+    background: var(--card-bg-glass);
+    backdrop-filter: blur(20px);
+    border-radius: var(--radius-lg);
+    padding: var(--space-md);
+    box-shadow: var(--shadow-md);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    transition: transform var(--transition-base), box-shadow var(--transition-base);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+}
+
+.sensor-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.sensor-card:active {
+    transform: scale(0.98);
+}
+
+.sensor-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.875rem;
+    font-weight: 700;
+}
+
+.sensor-card[data-sensor="temperature"] .sensor-icon {
+    background: linear-gradient(135deg, rgba(249, 115, 22, 0.15) 0%, rgba(249, 115, 22, 0.05) 100%);
+    color: var(--temp-color);
+}
+
+.sensor-card[data-sensor="humidity"] .sensor-icon {
+    background: linear-gradient(135deg, rgba(6, 182, 212, 0.15) 0%, rgba(6, 182, 212, 0.05) 100%);
+    color: var(--humidity-color);
+}
+
+.sensor-card[data-sensor="co2"] .sensor-icon {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(139, 92, 246, 0.05) 100%);
+    color: var(--co2-color);
+}
+
+.sensor-card[data-sensor="voc"] .sensor-icon {
+    background: linear-gradient(135deg, rgba(236, 72, 153, 0.15) 0%, rgba(236, 72, 153, 0.05) 100%);
+    color: var(--voc-color);
+}
+
+.sensor-icon svg {
+    width: 22px;
+    height: 22px;
+}
+
+.co2-icon {
+    font-size: 0.75rem !important;
+    font-weight: 800;
+}
+
+.sensor-info {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+}
+
+.sensor-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+}
+
+.sensor-value-row {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-xs);
+}
+
+.sensor-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1;
+}
+
+.sensor-unit {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.sensor-range {
+    margin-top: var(--space-sm);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+}
+
+.range-label {
+    font-size: 0.625rem;
+    color: var(--text-muted);
+}
+
+.range-bar {
+    height: 4px;
+    background: rgba(0, 0, 0, 0.08);
+    border-radius: var(--radius-sm);
+    position: relative;
+    overflow: visible;
+}
+
+.range-fill {
+    height: 100%;
+    border-radius: var(--radius-sm);
+    transition: width var(--transition-smooth);
+}
+
+.sensor-card[data-sensor="temperature"] .range-fill {
+    background: linear-gradient(90deg, var(--temp-color) 0%, rgba(249, 115, 22, 0.5) 100%);
+}
+
+.sensor-card[data-sensor="humidity"] .range-fill {
+    background: linear-gradient(90deg, var(--humidity-color) 0%, rgba(6, 182, 212, 0.5) 100%);
+}
+
+.sensor-card[data-sensor="co2"] .range-fill {
+    background: linear-gradient(90deg, var(--co2-color) 0%, rgba(139, 92, 246, 0.5) 100%);
+}
+
+.sensor-card[data-sensor="voc"] .range-fill {
+    background: linear-gradient(90deg, var(--voc-color) 0%, rgba(236, 72, 153, 0.5) 100%);
+}
+
+.range-marker {
+    position: absolute;
+    top: 50%;
+    width: 8px;
+    height: 8px;
+    background: var(--card-bg);
+    border: 2px solid currentColor;
+    border-radius: var(--radius-full);
+    transform: translate(-50%, -50%);
+    transition: left var(--transition-smooth);
+    box-shadow: var(--shadow-sm);
+}
+
+.sensor-card[data-sensor="temperature"] .range-marker {
+    color: var(--temp-color);
+}
+
+.sensor-card[data-sensor="humidity"] .range-marker {
+    color: var(--humidity-color);
+}
+
+.sensor-card[data-sensor="co2"] .range-marker {
+    color: var(--co2-color);
+}
+
+.sensor-card[data-sensor="voc"] .range-marker {
+    color: var(--voc-color);
+}
+
+/* ===================================
+   TIPS SECTION
+   =================================== */
+.tips-section {
+    margin-top: auto;
+}
+
+.tip-card {
+    background: var(--card-bg-glass);
+    backdrop-filter: blur(20px);
+    border-radius: var(--radius-lg);
+    padding: var(--space-md);
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-md);
+    box-shadow: var(--shadow-md);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+}
+
+.tip-icon {
+    font-size: 1.5rem;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.tip-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+}
+
+.tip-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.tip-text {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+/* ===================================
+   BOTTOM NAVIGATION
+   =================================== */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 480px;
+    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-medium) 100%);
+    padding: var(--space-sm) var(--space-lg);
+    padding-bottom: calc(var(--space-sm) + env(safe-area-inset-bottom, 8px));
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    z-index: 100;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-sm) var(--space-md);
+    text-decoration: none;
+    color: rgba(255, 255, 255, 0.6);
+    transition: all var(--transition-base);
+    border-radius: var(--radius-md);
+    position: relative;
+}
+
+.nav-item svg {
+    width: 24px;
+    height: 24px;
+    transition: transform var(--transition-base);
+}
+
+.nav-item span {
+    font-size: 0.65rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.nav-item:hover {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.nav-item.active {
+    color: var(--text-light);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.nav-item.active svg {
+    transform: scale(1.1);
+}
+
+.nav-item.active::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 20px;
+    height: 3px;
+    background: var(--text-light);
+    border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+}
+
+/* ===================================
+   RESPONSIVE ADJUSTMENTS
+   =================================== */
+@media (max-width: 360px) {
+    .main-content {
+        padding: var(--space-md);
+    }
+
+    .aqi-ring {
+        width: 170px;
+        height: 170px;
+    }
+
+    .aqi-inner {
+        width: 136px;
+        height: 136px;
+    }
+
+    .aqi-value {
+        font-size: 2.75rem;
+    }
+
+    .sensor-card {
+        padding: var(--space-sm);
+    }
+
+    .sensor-value {
+        font-size: 1.5rem;
+    }
+}
+
+@media (min-width: 481px) {
+    body {
+        background: var(--primary-dark);
+    }
+
+    #app {
+        margin-top: 20px;
+        margin-bottom: 20px;
+        border-radius: var(--radius-xl);
+        overflow: hidden;
+        box-shadow: 0 25px 80px rgba(0, 0, 0, 0.3);
+    }
+
+    .bottom-nav {
+        border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+    }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg-gradient-start: #0f172a;
+        --bg-gradient-end: #1e293b;
+        --card-bg: rgba(30, 41, 59, 0.95);
+        --card-bg-glass: rgba(30, 41, 59, 0.85);
+        --text-primary: #f1f5f9;
+        --text-secondary: #94a3b8;
+        --text-muted: #64748b;
+    }
+
+    .sensor-card {
+        border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .tip-card {
+        border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .range-bar {
+        background: rgba(255, 255, 255, 0.1);
+    }
+}
+
+/* Animation for data updates */
+@keyframes flash-update {
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+.updating {
+    animation: flash-update 0.3s ease;
+}
+
+/* Smooth scroll */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Safe area padding for notched devices */
+@supports (padding-top: env(safe-area-inset-top)) {
+    .app-header {
+        padding-top: calc(var(--space-lg) + env(safe-area-inset-top));
+    }
+}

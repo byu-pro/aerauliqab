@@ -20,13 +20,13 @@ const AQI_LEVELS = {
     },
     GOOD: {
         level: 2,
-        status: 'Good',
+        status: 'Normal',
         color: 'var(--aqi-good)',
         glow: 'var(--aqi-good-glow)',
         tip: {
             icon: '💨',
-            title: 'Air quality is good',
-            text: 'Perfect conditions for indoor activities. Keep up the good ventilation!'
+            title: 'Air quality is normal',
+            text: 'Good conditions for indoor activities. Keep up the ventilation!'
         }
     },
     POOR: {
@@ -88,30 +88,30 @@ const elements = {
     aqiStatus: document.getElementById('aqiStatus'),
     aqiProgressBar: document.getElementById('aqiProgressBar'),
     ledIndicator: document.getElementById('ledIndicator'),
-    
+
     // Sensor Elements
     tempValue: document.getElementById('tempValue'),
     humidityValue: document.getElementById('humidityValue'),
     co2Value: document.getElementById('co2Value'),
     vocValue: document.getElementById('vocValue'),
-    
+
     // Range Elements
     tempRange: document.getElementById('tempRange'),
     humidityRange: document.getElementById('humidityRange'),
     co2Range: document.getElementById('co2Range'),
     vocRange: document.getElementById('vocRange'),
-    
+
     // Markers
     tempMarker: document.getElementById('tempMarker'),
     humidityMarker: document.getElementById('humidityMarker'),
     co2Marker: document.getElementById('co2Marker'),
     vocMarker: document.getElementById('vocMarker'),
-    
+
     // Tips
     tipTitle: document.getElementById('tipTitle'),
     tipText: document.getElementById('tipText'),
     tipsSection: document.getElementById('tipsSection'),
-    
+
     // Connection
     connectionStatus: document.getElementById('connectionStatus')
 };
@@ -125,8 +125,8 @@ const elements = {
  */
 function calculateRangePercentage(value, sensor) {
     const th = THRESHOLDS[sensor];
-    
-    switch(sensor) {
+
+    switch (sensor) {
         case 'temperature':
             return Math.min(100, Math.max(0, ((value - th.min) / (th.max - th.min)) * 100));
         case 'humidity':
@@ -146,10 +146,10 @@ function calculateRangePercentage(value, sensor) {
 function calculateAQI(sensors) {
     const { temperature, humidity, co2, voc } = sensors;
     const th = THRESHOLDS;
-    
+
     // Score each parameter (lower is better, 1-4 scale)
     let scores = [];
-    
+
     // Temperature score
     if (temperature >= th.temperature.ideal_min && temperature <= th.temperature.ideal_max) {
         scores.push(1);
@@ -158,7 +158,7 @@ function calculateAQI(sensors) {
     } else {
         scores.push(3);
     }
-    
+
     // Humidity score
     if (humidity >= th.humidity.ideal_min && humidity <= th.humidity.ideal_max) {
         scores.push(1);
@@ -167,7 +167,7 @@ function calculateAQI(sensors) {
     } else {
         scores.push(3);
     }
-    
+
     // CO2 score (most impactful)
     if (co2 <= th.co2.excellent) {
         scores.push(1);
@@ -178,7 +178,7 @@ function calculateAQI(sensors) {
     } else {
         scores.push(4);
     }
-    
+
     // VOC score
     if (voc <= th.voc.excellent) {
         scores.push(1);
@@ -189,15 +189,15 @@ function calculateAQI(sensors) {
     } else {
         scores.push(4);
     }
-    
+
     // Overall AQI is the worst individual score (conservative approach)
     const maxScore = Math.max(...scores);
-    
+
     // If all scores are excellent, return 1
     // Otherwise, calculate weighted average with emphasis on worst score
     const avgScore = scores.reduce((a, b) => a + b, 0) / scores.length;
     const finalScore = Math.round((maxScore * 0.6) + (avgScore * 0.4));
-    
+
     return Math.min(4, Math.max(1, finalScore));
 }
 
@@ -205,7 +205,7 @@ function calculateAQI(sensors) {
  * Get AQI level configuration
  */
 function getAQILevel(aqi) {
-    switch(aqi) {
+    switch (aqi) {
         case 1: return AQI_LEVELS.EXCELLENT;
         case 2: return AQI_LEVELS.GOOD;
         case 3: return AQI_LEVELS.POOR;
@@ -219,11 +219,11 @@ function getAQILevel(aqi) {
  */
 function animateValue(element, newValue, decimals = 0) {
     if (!element) return;
-    
+
     element.classList.add('updating');
     setTimeout(() => {
-        element.textContent = typeof newValue === 'number' 
-            ? newValue.toFixed(decimals) 
+        element.textContent = typeof newValue === 'number'
+            ? newValue.toFixed(decimals)
             : newValue;
         element.classList.remove('updating');
     }, 150);
@@ -239,25 +239,25 @@ function animateValue(element, newValue, decimals = 0) {
 function updateAQI(aqi) {
     const level = getAQILevel(aqi);
     const root = document.documentElement;
-    
+
     // Update CSS custom properties
     root.style.setProperty('--current-aqi-color', level.color);
     root.style.setProperty('--current-aqi-glow', level.glow);
-    
+
     // Update AQI value and status
     animateValue(elements.aqiValue, aqi);
     animateValue(elements.aqiStatus, level.status);
-    
+
     // Update progress ring (4 levels = 25% each)
     // Full circle = 565.48, so each level = 141.37
     const circumference = 565.48;
     const progress = (aqi / 4) * circumference;
     const offset = circumference - progress;
-    
+
     if (elements.aqiProgressBar) {
         elements.aqiProgressBar.style.strokeDashoffset = offset;
     }
-    
+
     // Update tips
     updateTips(level.tip);
 }
@@ -271,19 +271,19 @@ function updateSensors(sensors) {
     const tempPercent = calculateRangePercentage(sensors.temperature, 'temperature');
     if (elements.tempRange) elements.tempRange.style.width = `${tempPercent}%`;
     if (elements.tempMarker) elements.tempMarker.style.left = `${tempPercent}%`;
-    
+
     // Humidity
     animateValue(elements.humidityValue, sensors.humidity, 0);
     const humidityPercent = calculateRangePercentage(sensors.humidity, 'humidity');
     if (elements.humidityRange) elements.humidityRange.style.width = `${humidityPercent}%`;
     if (elements.humidityMarker) elements.humidityMarker.style.left = `${humidityPercent}%`;
-    
+
     // CO2
     animateValue(elements.co2Value, sensors.co2, 0);
     const co2Percent = calculateRangePercentage(sensors.co2, 'co2');
     if (elements.co2Range) elements.co2Range.style.width = `${co2Percent}%`;
     if (elements.co2Marker) elements.co2Marker.style.left = `${co2Percent}%`;
-    
+
     // VOC
     animateValue(elements.vocValue, sensors.voc, 0);
     const vocPercent = calculateRangePercentage(sensors.voc, 'voc');
@@ -307,7 +307,7 @@ function updateTips(tip) {
 function updateConnectionStatus(connected) {
     const statusDot = document.querySelector('.status-dot');
     const statusText = document.querySelector('.status-text');
-    
+
     if (connected) {
         statusDot?.classList.add('connected');
         statusDot?.classList.remove('disconnected');
@@ -335,20 +335,20 @@ function simulateSensorData() {
         co2: Math.floor((Math.random() - 0.5) * 30),
         voc: Math.floor((Math.random() - 0.5) * 5)
     };
-    
+
     // Apply variations with bounds
-    appState.sensors.temperature = Math.max(15, Math.min(35, 
+    appState.sensors.temperature = Math.max(15, Math.min(35,
         appState.sensors.temperature + variation.temperature));
-    appState.sensors.humidity = Math.max(20, Math.min(80, 
+    appState.sensors.humidity = Math.max(20, Math.min(80,
         appState.sensors.humidity + variation.humidity));
-    appState.sensors.co2 = Math.max(400, Math.min(2500, 
+    appState.sensors.co2 = Math.max(400, Math.min(2500,
         appState.sensors.co2 + variation.co2));
-    appState.sensors.voc = Math.max(10, Math.min(200, 
+    appState.sensors.voc = Math.max(10, Math.min(200,
         appState.sensors.voc + variation.voc));
-    
+
     // Calculate new AQI
     appState.currentAQI = calculateAQI(appState.sensors);
-    
+
     // Update UI
     updateSensors(appState.sensors);
     updateAQI(appState.currentAQI);
@@ -363,21 +363,21 @@ function simulateSensorData() {
  */
 function setupNavigation() {
     const navItems = document.querySelectorAll('.nav-item');
-    
+
     navItems.forEach(item => {
         item.addEventListener('click', (e) => {
             e.preventDefault();
-            
+
             // Remove active from all
             navItems.forEach(nav => nav.classList.remove('active'));
-            
+
             // Add active to clicked
             item.classList.add('active');
-            
+
             // Handle page navigation (placeholder for future implementation)
             const page = item.dataset.page;
             console.log(`Navigating to: ${page}`);
-            
+
             // For demo, show a subtle feedback
             item.style.transform = 'scale(0.95)';
             setTimeout(() => {
@@ -396,18 +396,18 @@ function setupNavigation() {
  */
 function init() {
     console.log('🌬️ Aerauliqa IAQ Monitor Initialized');
-    
+
     // Initial render
     updateSensors(appState.sensors);
     updateAQI(appState.currentAQI);
     updateConnectionStatus(appState.connected);
-    
+
     // Setup navigation
     setupNavigation();
-    
+
     // Start simulation for demo (update every 3 seconds)
     setInterval(simulateSensorData, 3000);
-    
+
     // Add touch feedback for sensor cards
     document.querySelectorAll('.sensor-card').forEach(card => {
         card.addEventListener('touchstart', () => {
@@ -434,14 +434,14 @@ if (document.readyState === 'loading') {
  * Expose demo functions for testing different AQI levels
  * Usage in console: setDemoAQI(1) for Excellent, setDemoAQI(4) for Very Poor
  */
-window.setDemoAQI = function(level) {
+window.setDemoAQI = function (level) {
     const scenarios = {
         1: { temperature: 22, humidity: 50, co2: 450, voc: 15 },
         2: { temperature: 24, humidity: 45, co2: 750, voc: 35 },
         3: { temperature: 27, humidity: 35, co2: 1200, voc: 75 },
         4: { temperature: 30, humidity: 70, co2: 2000, voc: 150 }
     };
-    
+
     if (scenarios[level]) {
         appState.sensors = { ...scenarios[level] };
         appState.currentAQI = level;
@@ -451,7 +451,7 @@ window.setDemoAQI = function(level) {
     }
 };
 
-window.toggleConnection = function() {
+window.toggleConnection = function () {
     appState.connected = !appState.connected;
     updateConnectionStatus(appState.connected);
     console.log(`Connection: ${appState.connected ? 'Connected' : 'Disconnected'}`);
